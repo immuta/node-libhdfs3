@@ -68,7 +68,6 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
     DEBUG("HDFileSystem::UV_Connect");
 
     connect_work_data* data = (connect_work_data *)(req->data);
-    // Need to acquire lock here?
     data->fileSystem->fs = hdfsBuilderConnect(data->bld);
 }
 
@@ -87,6 +86,8 @@ void HDFileSystem::UV_AfterConnect(uv_work_t* req, int status) {
     data->cb->Call(2, info);
 
     delete data->cb;
+    free(data);
+    free(req);
 }
 
 NAN_METHOD(HDFileSystem::ConnectSync) {
@@ -233,7 +234,6 @@ void HDFileSystem::UV_List(uv_work_t* req) {
     DEBUG("HDFileSystem::UV_List");
 
     list_work_data* data = (list_work_data *)(req->data);
-    // Need to acquire lock here?
     data->contents = hdfsListDirectory(data->fileSystem->fs, data->targetDir, &data->entryCount);
 }
 
@@ -261,6 +261,8 @@ void HDFileSystem::UV_AfterList(uv_work_t* req, int status) {
 
     delete data->cb;
     delete[] data->targetDir;
+    free(data);
+    free(req);
 }
 
 NAN_METHOD(HDFileSystem::FileInfo) {
@@ -303,7 +305,6 @@ void HDFileSystem::UV_FileInfo(uv_work_t* req) {
     DEBUG("HDFileSystem::UV_FileInfo");
 
     fileInfo_work_data* data = (fileInfo_work_data *)(req->data);
-    // Need to acquire lock here?
     data->info = hdfsGetPathInfo(data->fileSystem->fs, data->path);
 }
 
@@ -329,6 +330,8 @@ void HDFileSystem::UV_AfterFileInfo(uv_work_t* req, int status) {
 
     delete data->cb;
     delete[] data->path;
+    free(data);
+    free(req);
 }
 
 NAN_METHOD(HDFileSystem::FileInfoSync) {
@@ -390,7 +393,6 @@ void HDFileSystem::UV_FileXAttrs(uv_work_t* req) {
     DEBUG("HDFileSystem::UV_FileXAttrs");
 
     fileXAttrs_work_data* data = (fileXAttrs_work_data *)(req->data);
-    // Need to acquire lock here?
     data->xattrs = hdfsListXAttrs(data->fileSystem->fs, data->path, &data->attrCount);
 }
 
@@ -420,6 +422,8 @@ void HDFileSystem::UV_AfterFileXAttrs(uv_work_t* req, int status) {
 
     delete data->cb;
     delete[] data->path;
+    free(data);
+    free(req);
 }
 
 NAN_METHOD(HDFileSystem::FileXAttrsSync) {
@@ -439,7 +443,7 @@ NAN_METHOD(HDFileSystem::FileXAttrsSync) {
             xattrs->Set(V8_STRING(fileXAttrs[i].name), V8_STRING(fileXAttrs[i].value));
         }
         info.GetReturnValue().Set(xattrs);
-        //hdfsFreeXAttrs(xattrs, attrCount);
+        hdfsFreeXAttrs(fileXAttrs, attrCount);
     } else {
         info.GetReturnValue().Set(Nan::Null());
     }
@@ -481,7 +485,6 @@ void HDFileSystem::UV_Disconnect(uv_work_t* req) {
     DEBUG("HDFileSystem::UV_Disconnect");
 
     disconnect_work_data* data = (disconnect_work_data *)(req->data);
-    // Need to acquire lock here?
     hdfsDisconnect(data->fileSystem->fs);
 }
 
@@ -500,6 +503,8 @@ void HDFileSystem::UV_AfterDisconnect(uv_work_t* req, int status) {
     data->cb->Call(2, info);
 
     delete data->cb;
+    free(data);
+    free(req);
 }
 
 NAN_METHOD(HDFileSystem::DisconnectSync) {

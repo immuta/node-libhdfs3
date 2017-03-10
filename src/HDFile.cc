@@ -44,7 +44,6 @@ NAN_METHOD(HDFile::Read) {
     uv_work_t*              work_req = (uv_work_t *) (calloc(1, sizeof(uv_work_t)));
     read_work_data*         data = (read_work_data *) (calloc(1, sizeof(read_work_data)));
 
-    // file.read(function cb() {})
     if (info.Length() != 1) {
         return Nan::ThrowTypeError("HDFile::read(): Requires 1 arguments. ");
     }
@@ -87,7 +86,6 @@ void HDFile::UV_Read(uv_work_t* req) {
 
     data->bytesRead = hdfsRead(data->file->fileSystem,
                                 data->file->handle,
-                                //((std::vector<char> *)(data->buf))[0],
                                 &buf[0],
                                 FILE_READ_SIZE);
     std::copy(buf.begin(), buf.end(), data->buf);
@@ -124,6 +122,8 @@ void HDFile::UV_AfterRead(uv_work_t* req, int status) {
     data->cb->Call(2, info);
 
     delete data->cb;
+    free(data);
+    free(req);
 }
 
 void HDFile::buffer_delete_callback(char* data, void* buf) {
