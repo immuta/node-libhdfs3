@@ -1,0 +1,35 @@
+{
+  "name": "libhdfs3",
+  "description": "libhdfs3 bindings for node",
+  "version": "0.0.1",
+  "main": "lib/hdfs.js",
+  "homepage": "http://github.com/immuta/node-libhdfs3/",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/immuta/node-libhdfs3.git"
+  },
+  "bugs": {
+    "url": "https://github.com/immuta/node-libhdfs3/issues"
+  },
+  "contributors": [
+    {
+      "name": "Kyle Lilly",
+      "email": "kyle@immuta.com"
+    }
+  ],
+  "directories": {
+    "lib": "."
+  },
+  "engines": {
+    "node": ">=4.7.0"
+  },
+  "scripts": {
+    "install": "node-gyp rebuild",
+    "test": "cd test && node run-tests.js"
+  },
+  "dependencies": {
+    "bindings": "^1.2.1",
+    "nan": "^2.0.9"
+  },
+  "gypfile": true
+}
