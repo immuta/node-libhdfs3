@@ -68,7 +68,7 @@ api
 
 ### libhdfs3
 
-Basica functionality is provided via the `libhdfs3` class. You can get an
+Basic functionality is provided via the `libhdfs3` class. You can get an
 instance via:
 
 ```javascript
@@ -100,7 +100,9 @@ fs.connect('hdfs://192.168.99.100:8020', function(err, success) {
 ```
 #### .connect(options, callback)
 
-Open a connection to an HDFS cluster using the supplied configuration options.
+Open a connection to an HDFS cluster using the supplied configuration options. Supported
+options include kerberos authentication, effective user setting (impersonation), and
+any additional HDFS config settings.
 
 * **options** - The configuration options to use when establishing the connection
 * **callback** - `callback (err, success)`
@@ -111,6 +113,7 @@ var options = {
     "kerbTicketCachePath": "",  // Optional kerberos ticket cache path
     "port": 8020,  // Optional namenode port if not included with nameNode property
     "userName": "", // Optional username to use when connecting
+    "effectiveUser": "", // Optional effective user to execute actions as
     "extra": {
         // Extra can contain any additional configuration paramaters that will be
         // set in the config object prior to connecting

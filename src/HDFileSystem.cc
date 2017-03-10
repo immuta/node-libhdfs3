@@ -117,6 +117,7 @@ hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
         v8::Local<v8::String> tokenKey = V8_STRING("token");
         v8::Local<v8::String> ticketPathKey = V8_STRING("kerbTicketCachePath");
         v8::Local<v8::String> extraKey = V8_STRING("extra");
+        v8::Local<v8::String> effectiveUserKey = V8_STRING("effectiveUser");
 
         if (valueExists(conf, nameNodeKey)) {
             char* nn = NewCString(Nan::Get(conf, nameNodeKey).ToLocalChecked());
@@ -131,6 +132,11 @@ hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
             char* userName = NewCString(Nan::Get(conf, userNameKey).ToLocalChecked());
             hdfsBuilderSetUserName(bld, userName);
             delete[] userName;
+        }
+        if (valueExists(conf, effectiveUserKey)) {
+            char* effectiveUser = NewCString(Nan::Get(conf, effectiveUserKey).ToLocalChecked());
+            hdfsBuilderSetEffectiveUser(bld, effectiveUser);
+            delete[] effectiveUser;
         }
         if (valueExists(conf, tokenKey)) {
             char* token = NewCString(Nan::Get(conf, tokenKey).ToLocalChecked());
