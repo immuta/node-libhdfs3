@@ -281,7 +281,7 @@ TODO
 -------
 
 - testing
-- error handling (most things don't handle errors and will simply explode)
+- additional error handling
 - testing
 - additional options for read (block size/seek/etc)
 - additional libhdfs API support

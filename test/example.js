@@ -16,11 +16,11 @@
 var libhdfs3 = require('./lib/hdfs');
 var fs = new libhdfs3();
 
-var targetDir = '/user/cloudera/hdfs-example/logs';    // The target dir should contain files
+var targetDir = '/user/cloudera';    // The target dir should contain files
 var kerbTicketCachePath = undefined;                   // Set this to use kerberos
 
 var options = {
-    "nameNode": "hdfs://192.168.99.100:8020",
+    "nameNode": "hdfs://localhost:8020",
     "extra": {
         "dfs.client.use.datanode.hostname": "true"
     }
@@ -32,10 +32,13 @@ if (kerbTicketCachePath) {
 }
 
 fs.connect(options, function(err, success) {
+    if (err) {
+        return console.log('Connection Error :: ', err)
+    }
+
     fs.ls(targetDir, function(lsErr, dirContents) {
         if (lsErr) {
-            console.log('Error: ', err);
-            return;
+            return console.log('Error listing directory :: ', err);
         }
 
         for (var i = 0; i < dirContents.length; i++) {
@@ -43,6 +46,12 @@ fs.connect(options, function(err, success) {
             if (dirContents[i].kind === 'FILE' && dirContents[i].size > 1024 * 64) {
                 // Read and pipe a file to stdout
                 fs.read(dirContents[i].path, function(readErr, stream) {
+                    if (readErr) {
+                        console.log("File Read Error:", readErr);
+                    }
+                    stream.on('error', function (err) {
+                        console.log("Stream Error:", err);
+                    });
                     stream.pipe(process.stdout);
                 });
                 break;

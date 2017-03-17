@@ -12,6 +12,7 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#include <errno.h>
 
 #include "addon.h"
 
@@ -34,7 +35,7 @@ NAN_METHOD(HDFileSystem::Connect) {
     v8::Local<v8::Function> cb;
     HDFileSystem*           self = NODE_FS();
     uv_work_t*              work_req = (uv_work_t *) (calloc(1, sizeof(uv_work_t)));
-    connect_work_data*         data = (connect_work_data *) (calloc(1, sizeof(connect_work_data)));
+    connect_work_data*      data = (connect_work_data *) (calloc(1, sizeof(connect_work_data)));
 
     if (info.Length() != 2) {
         return Nan::ThrowTypeError("Invalid number of arguments. Connect requires 2 arguments.");
@@ -78,8 +79,13 @@ void HDFileSystem::UV_AfterConnect(uv_work_t* req, int status) {
     connect_work_data*      data = (connect_work_data *)(req->data);
 
     v8::Local<v8::Value> info[2];
-    info[0] = Nan::Null(); // Error would go here if we had one...
-    info[1] = Nan::True();
+    if (!data->fileSystem->fs) {
+        info[0] = Nan::Error("Unable to connect to HDFS");
+        info[1] = Nan::False();
+    } else {
+        info[0] = Nan::Null();
+        info[1] = Nan::True();
+    }
 
     data->fileSystem->Unref();
 
@@ -201,6 +207,9 @@ void HDFileSystem::UV_List(uv_work_t* req) {
 
     list_work_data* data = (list_work_data *)(req->data);
     data->contents = hdfsListDirectory(data->fileSystem->fs, data->targetDir, &data->entryCount);
+    if (!data->contents) {
+        data->error = errno;
+    }
 }
 
 void HDFileSystem::UV_AfterList(uv_work_t* req, int status) {
@@ -218,8 +227,13 @@ void HDFileSystem::UV_AfterList(uv_work_t* req, int status) {
     }
 
     v8::Local<v8::Value> info[2];
-    info[0] = Nan::Null(); // Error would go here if we had one...
-    info[1] = directoryContents;
+    if (data->error) {
+        info[0] = Nan::ErrnoException(data->error);
+        info[1] = Nan::Null();
+    } else {
+        info[0] = Nan::Null(); // Error would go here if we had one...
+        info[1] = directoryContents;
+    }
 
     data->fileSystem->Unref();
 
@@ -272,6 +286,9 @@ void HDFileSystem::UV_FileInfo(uv_work_t* req) {
 
     fileInfo_work_data* data = (fileInfo_work_data *)(req->data);
     data->info = hdfsGetPathInfo(data->fileSystem->fs, data->path);
+    if (!data->info) {
+        data->error = errno;
+    }
 }
 
 void HDFileSystem::UV_AfterFileInfo(uv_work_t* req, int status) {
@@ -281,13 +298,13 @@ void HDFileSystem::UV_AfterFileInfo(uv_work_t* req, int status) {
     fileInfo_work_data*         data = (fileInfo_work_data *)(req->data);
 
     v8::Local<v8::Value> info[2];
-    info[0] = Nan::Null(); // Error would go here if we had one...
-
-    if (data->info) {
+    if (data->error) {
+        info[0] = Nan::ErrnoException(data->error);
+        info[1] = Nan::Null();
+    } else {
+        info[0] = Nan::Null();
         info[1] = createFileInfoObject(*(data->info));
         hdfsFreeFileInfo(data->info, 1);
-    } else {
-        info[1] = Nan::Null();
     }
 
     data->fileSystem->Unref();
@@ -342,6 +359,9 @@ void HDFileSystem::UV_FileXAttrs(uv_work_t* req) {
 
     fileXAttrs_work_data* data = (fileXAttrs_work_data *)(req->data);
     data->xattrs = hdfsListXAttrs(data->fileSystem->fs, data->path, &data->attrCount);
+    if (!data->xattrs) {
+        data->error = errno;
+    }
 }
 
 void HDFileSystem::UV_AfterFileXAttrs(uv_work_t* req, int status) {
@@ -352,16 +372,21 @@ void HDFileSystem::UV_AfterFileXAttrs(uv_work_t* req, int status) {
     v8::Local<v8::Object>   xattrs = Nan::New<v8::Object>();
     v8::Local<v8::Value>    info[2];
 
-    info[0] = Nan::Null(); // Error would go here if we had one...
 
-    if (data->attrCount > 0) {
-        for (int i = 0; i < data->attrCount; i++) {
-            xattrs->Set(V8_STRING(data->xattrs[i].name), V8_STRING(data->xattrs[i].value));
-        }
-        info[1] = xattrs;
-        hdfsFreeXAttrs(data->xattrs, data->attrCount);
-    } else {
+    if (data->error) {
+        info[0] = Nan::ErrnoException(data->error);
         info[1] = Nan::Null();
+    } else {
+        info[0] = Nan::Null();
+        if (data->attrCount > 0) {
+            for (int i = 0; i < data->attrCount; i++) {
+                xattrs->Set(V8_STRING(data->xattrs[i].name), V8_STRING(data->xattrs[i].value));
+            }
+            info[1] = xattrs;
+            hdfsFreeXAttrs(data->xattrs, data->attrCount);
+        } else {
+            info[1] = Nan::Null();
+        }
     }
 
     data->fileSystem->Unref();
@@ -420,7 +445,7 @@ void HDFileSystem::UV_AfterDisconnect(uv_work_t* req, int status) {
     disconnect_work_data*   data = (disconnect_work_data *)(req->data);
     v8::Local<v8::Value>    info[2];
 
-    info[0] = Nan::Null(); // Error would go here if we had one...
+    info[0] = Nan::Null();
     info[1] = Nan::True();
 
     data->fileSystem->Unref();

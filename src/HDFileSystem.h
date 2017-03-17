@@ -68,6 +68,7 @@ struct list_work_data {
     hdfsFileInfo*   contents;
     char*           targetDir;
     int             entryCount;
+    int             error;
 };
 
 struct connect_work_data {
@@ -86,6 +87,7 @@ struct fileInfo_work_data {
     HDFileSystem*   fileSystem;
     char*           path;
     hdfsFileInfo*   info;
+    int             error;
 };
 
 struct fileXAttrs_work_data {
@@ -94,6 +96,7 @@ struct fileXAttrs_work_data {
     char*           path;
     hdfsXAttr*      xattrs;
     int             attrCount;
+    int             error;
 };
 
 #endif
