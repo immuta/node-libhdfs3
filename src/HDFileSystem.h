@@ -32,35 +32,30 @@ class HDFileSystem : public Nan::ObjectWrap {
 
     public:
         static NAN_METHOD(Connect);
-        static NAN_METHOD(ConnectSync);
     protected:
         static void UV_Connect(uv_work_t* work_req);
         static void UV_AfterConnect(uv_work_t* work_req, int status);
 
     public:
         static NAN_METHOD(Disconnect);
-        static NAN_METHOD(DisconnectSync);
     protected:
         static void UV_Disconnect(uv_work_t* work_req);
         static void UV_AfterDisconnect(uv_work_t* work_req, int status);
 
     public:
         static NAN_METHOD(FileInfo);
-        static NAN_METHOD(FileInfoSync);
     protected:
         static void UV_FileInfo(uv_work_t* work_req);
         static void UV_AfterFileInfo(uv_work_t* work_req, int status);
 
     public:
         static NAN_METHOD(FileXAttrs);
-        static NAN_METHOD(FileXAttrsSync);
     protected:
         static void UV_FileXAttrs(uv_work_t* work_req);
         static void UV_AfterFileXAttrs(uv_work_t* work_req, int status);
 
     public:
         static NAN_METHOD(List);
-        static NAN_METHOD(ListSync);
     protected:
         static void UV_List(uv_work_t* work_req);
         static void UV_AfterList(uv_work_t* work_req, int status);
@@ -73,6 +68,7 @@ struct list_work_data {
     hdfsFileInfo*   contents;
     char*           targetDir;
     int             entryCount;
+    int             error;
 };
 
 struct connect_work_data {
@@ -91,6 +87,7 @@ struct fileInfo_work_data {
     HDFileSystem*   fileSystem;
     char*           path;
     hdfsFileInfo*   info;
+    int             error;
 };
 
 struct fileXAttrs_work_data {
@@ -99,6 +96,7 @@ struct fileXAttrs_work_data {
     char*           path;
     hdfsXAttr*      xattrs;
     int             attrCount;
+    int             error;
 };
 
 #endif

@@ -1,7 +1,7 @@
 node-libhdfs3
 ---------
 
-An asynchronous/synchronous interface for node.js to HDFS via the libhdfs3 library.
+An asynchronous interface for node.js to HDFS via the libhdfs3 library.
 
 requirements
 ------------
@@ -281,7 +281,7 @@ TODO
 -------
 
 - testing
-- error handling (most things don't handle errors and will simply explode)
+- additional error handling
 - testing
 - additional options for read (block size/seek/etc)
 - additional libhdfs API support

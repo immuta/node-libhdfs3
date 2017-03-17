@@ -41,6 +41,7 @@ struct read_work_data {
     Nan::Callback*      cb;
     HDFile*             file;
     tOffset             bytesRead;
+    int                 error;
     char*               buf;
 };
 

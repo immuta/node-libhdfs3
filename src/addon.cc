@@ -24,15 +24,10 @@ NAN_MODULE_INIT(InitAddon) {
 
   // File System Functions
   Nan::SetPrototypeMethod(fsTemplate, "connect", HDFileSystem::Connect);
-  Nan::SetPrototypeMethod(fsTemplate, "connectSync", HDFileSystem::ConnectSync);
   Nan::SetPrototypeMethod(fsTemplate, "disconnect", HDFileSystem::Disconnect);
-  Nan::SetPrototypeMethod(fsTemplate, "disconnectSync", HDFileSystem::DisconnectSync);
   Nan::SetPrototypeMethod(fsTemplate, "info", HDFileSystem::FileInfo);
-  Nan::SetPrototypeMethod(fsTemplate, "infoSync", HDFileSystem::FileInfoSync);
   Nan::SetPrototypeMethod(fsTemplate, "ls", HDFileSystem::List);
-  Nan::SetPrototypeMethod(fsTemplate, "lsSync", HDFileSystem::ListSync);
   Nan::SetPrototypeMethod(fsTemplate, "xattrs", HDFileSystem::FileXAttrs);
-  Nan::SetPrototypeMethod(fsTemplate, "xattrsSync", HDFileSystem::FileXAttrsSync);
 
   Nan::Set(target,
       Nan::New("FileSystem").ToLocalChecked(), Nan::GetFunction(fsTemplate).ToLocalChecked());

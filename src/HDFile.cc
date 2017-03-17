@@ -12,6 +12,7 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#include <errno.h>
 
 #include "addon.h"
 #include "HDFileSystem.h"
@@ -80,6 +81,11 @@ void HDFile::UV_Read(uv_work_t* req) {
     if (!data->file->handle || !hdfsFileIsOpenForRead(data->file->handle)) {
         DEBUG("Opening file...");
         data->file->handle = hdfsOpenFile(data->file->fileSystem, data->file->path, O_RDONLY, 0, 0, 0);
+        // Check for open error
+        if (data->file->handle == NULL) {
+            data->error = errno;
+            return;
+        }
     }
     DEBUG("Reading File...");
     std::vector<char> buf(FILE_READ_SIZE);
@@ -88,6 +94,11 @@ void HDFile::UV_Read(uv_work_t* req) {
                                 data->file->handle,
                                 &buf[0],
                                 FILE_READ_SIZE);
+    // Check for read error
+    if (data->bytesRead == -1) {
+        data->error = errno;
+        return;
+    }
     std::copy(buf.begin(), buf.end(), data->buf);
 
     // If we're at the end of the file then we can close it
@@ -106,16 +117,21 @@ void HDFile::UV_AfterRead(uv_work_t* req, int status) {
     v8::Local<v8::Object>   readInfo = Nan::New<v8::Object>();
     read_work_data*         data = (read_work_data *)(req->data);
 
-    // Return data which includes bytesRead count, eof, and buffer
-    readInfo->Set(V8_STRING("data"), Nan::NewBuffer(data->buf,
-                                        data->bytesRead,
-                                        buffer_delete_callback,
-                                        &data->buf).ToLocalChecked());
-    readInfo->Set(V8_STRING("bytesRead"), Nan::New<v8::Number>(data->bytesRead));
-    readInfo->Set(V8_STRING("eof"), Nan::New(data->bytesRead != FILE_READ_SIZE));
+    if (data->error) {
+        info[0] = Nan::ErrnoException(data->error);
+        info[1] = Nan::Null();
+    } else {
+        // Return data which includes bytesRead count, eof, and buffer
+        readInfo->Set(V8_STRING("data"), Nan::NewBuffer(data->buf,
+                                            data->bytesRead,
+                                            buffer_delete_callback,
+                                            &data->buf).ToLocalChecked());
+        readInfo->Set(V8_STRING("bytesRead"), Nan::New<v8::Number>(data->bytesRead));
+        readInfo->Set(V8_STRING("eof"), Nan::New(data->bytesRead != FILE_READ_SIZE));
 
-    info[0] = Nan::Null(); // Error would go here if we had one...
-    info[1] = readInfo;
+        info[0] = Nan::Null();
+        info[1] = readInfo;
+    }
 
     data->file->Unref();
 
