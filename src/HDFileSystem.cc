@@ -90,19 +90,6 @@ void HDFileSystem::UV_AfterConnect(uv_work_t* req, int status) {
     free(req);
 }
 
-NAN_METHOD(HDFileSystem::ConnectSync) {
-    DEBUG("HDFileSystem::ConnectSync");
-    HDFileSystem* self = NODE_FS();
-
-    if (info.Length() == 1) {
-        // Check if it's in connection string format (nn) or an object
-        self->fs = hdfsBuilderConnect(builderFromOptions(info[0]));
-        info.GetReturnValue().Set(Nan::True());
-    } else {
-        Nan::ThrowTypeError("Invalid number of arguments");
-    }
-}
-
 hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
     hdfsBuilder* bld = hdfsNewBuilder();
     // Connect using the first param as the "connection string"
@@ -169,27 +156,6 @@ hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
         return NULL;
     }
     return bld;
-}
-
-NAN_METHOD(HDFileSystem::ListSync) {
-    DEBUG("HDFileSystem::ListSync");
-
-    hdfsFileInfo*           contents;
-    HDFileSystem*           self = NODE_FS();
-    char*                   targetDir = NewCString(info[0]);
-    int                     entryCount = 0;
-    v8::Local<v8::Array>    directoryContents = Nan::New<v8::Array>();
-
-    contents = hdfsListDirectory(self->fs, targetDir, &entryCount);
-
-    if (contents) {
-        for (int i = 0; i < entryCount; i++) {
-            directoryContents->Set(i, createFileInfoObject(contents[i]));
-        }
-        hdfsFreeFileInfo(contents, entryCount);
-    }
-    delete[] targetDir;
-    info.GetReturnValue().Set(directoryContents);
 }
 
 NAN_METHOD(HDFileSystem::List) {
@@ -334,24 +300,6 @@ void HDFileSystem::UV_AfterFileInfo(uv_work_t* req, int status) {
     free(req);
 }
 
-NAN_METHOD(HDFileSystem::FileInfoSync) {
-    DEBUG("HDFileSystem::FileInfoSync");
-
-    hdfsFileInfo*   fileInfo;
-    HDFileSystem*   self = NODE_FS();
-    char*           path = NewCString(info[0]);
-
-    fileInfo = hdfsGetPathInfo(self->fs, path);
-    delete[] path;
-
-    if (fileInfo) {
-        info.GetReturnValue().Set(createFileInfoObject(*fileInfo));
-        hdfsFreeFileInfo(fileInfo, 1);
-    } else {
-        info.GetReturnValue().Set(Nan::Null());
-    }
-}
-
 NAN_METHOD(HDFileSystem::FileXAttrs) {
     DEBUG("HDFileSystem::FileXAttrs");
 
@@ -426,29 +374,6 @@ void HDFileSystem::UV_AfterFileXAttrs(uv_work_t* req, int status) {
     free(req);
 }
 
-NAN_METHOD(HDFileSystem::FileXAttrsSync) {
-    DEBUG("HDFileSystem::FileXAttrsSync");
-
-    hdfsXAttr*      fileXAttrs;
-    HDFileSystem*   self = NODE_FS();
-    char*           path = NewCString(info[0]);
-    int             attrCount = 0;
-
-    fileXAttrs = hdfsListXAttrs(self->fs, path, &attrCount);
-    delete[] path;
-
-    if (attrCount > 0) {
-        v8::Local<v8::Object> xattrs = Nan::New<v8::Object>();
-        for (int i = 0; i < attrCount; i++) {
-            xattrs->Set(V8_STRING(fileXAttrs[i].name), V8_STRING(fileXAttrs[i].value));
-        }
-        info.GetReturnValue().Set(xattrs);
-        hdfsFreeXAttrs(fileXAttrs, attrCount);
-    } else {
-        info.GetReturnValue().Set(Nan::Null());
-    }
-}
-
 NAN_METHOD(HDFileSystem::Disconnect) {
     DEBUG("HDFileSystem::Disconnect");
 
@@ -505,16 +430,6 @@ void HDFileSystem::UV_AfterDisconnect(uv_work_t* req, int status) {
     delete data->cb;
     free(data);
     free(req);
-}
-
-NAN_METHOD(HDFileSystem::DisconnectSync) {
-    DEBUG("HDFileSystem::Disconnect");
-    HDFileSystem* self = NODE_FS();
-
-    // Disconnect
-    hdfsDisconnect(self->fs);
-
-    info.GetReturnValue().Set(Nan::True());
 }
 
 v8::Local<v8::Object> HDFileSystem::createFileInfoObject(hdfsFileInfo info) {
