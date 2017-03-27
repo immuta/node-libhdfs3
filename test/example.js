@@ -13,7 +13,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-var libhdfs3 = require('./lib/hdfs');
+var libhdfs3 = require('../lib/hdfs');
 var fs = new libhdfs3();
 
 var targetDir = '/user/cloudera';    // The target dir should contain files
@@ -33,7 +33,7 @@ if (kerbTicketCachePath) {
 
 fs.connect(options, function(err, success) {
     if (err) {
-        return console.log('Connection Error :: ', err)
+        return console.log('Connection Error :: ', err);
     }
 
     fs.ls(targetDir, function(lsErr, dirContents) {

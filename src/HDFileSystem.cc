@@ -13,6 +13,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 #include <errno.h>
+#include <hdfs/Exception.h>
 
 #include "addon.h"
 
@@ -69,7 +70,12 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
     DEBUG("HDFileSystem::UV_Connect");
 
     connect_work_data* data = (connect_work_data *)(req->data);
+
     data->fileSystem->fs = hdfsBuilderConnect(data->bld);
+    if (!data->fileSystem->fs) {
+        data->error = errno;
+        data->errMsg = hdfsGetLastError();
+    }
 }
 
 void HDFileSystem::UV_AfterConnect(uv_work_t* req, int status) {
@@ -79,8 +85,8 @@ void HDFileSystem::UV_AfterConnect(uv_work_t* req, int status) {
     connect_work_data*      data = (connect_work_data *)(req->data);
 
     v8::Local<v8::Value> info[2];
-    if (!data->fileSystem->fs) {
-        info[0] = Nan::Error("Unable to connect to HDFS");
+    if (data->error) {
+        info[0] = Nan::ErrnoException(data->error, NULL, data->errMsg);
         info[1] = Nan::False();
     } else {
         info[0] = Nan::Null();
@@ -209,6 +215,7 @@ void HDFileSystem::UV_List(uv_work_t* req) {
     data->contents = hdfsListDirectory(data->fileSystem->fs, data->targetDir, &data->entryCount);
     if (!data->contents) {
         data->error = errno;
+        data->errMsg = hdfsGetLastError();
     }
 }
 
@@ -228,7 +235,7 @@ void HDFileSystem::UV_AfterList(uv_work_t* req, int status) {
 
     v8::Local<v8::Value> info[2];
     if (data->error) {
-        info[0] = Nan::ErrnoException(data->error);
+        info[0] = Nan::ErrnoException(data->error, NULL, data->errMsg);
         info[1] = Nan::Null();
     } else {
         info[0] = Nan::Null(); // Error would go here if we had one...
@@ -288,6 +295,7 @@ void HDFileSystem::UV_FileInfo(uv_work_t* req) {
     data->info = hdfsGetPathInfo(data->fileSystem->fs, data->path);
     if (!data->info) {
         data->error = errno;
+        data->errMsg = hdfsGetLastError();
     }
 }
 
@@ -299,7 +307,7 @@ void HDFileSystem::UV_AfterFileInfo(uv_work_t* req, int status) {
 
     v8::Local<v8::Value> info[2];
     if (data->error) {
-        info[0] = Nan::ErrnoException(data->error);
+        info[0] = Nan::ErrnoException(data->error, NULL, data->errMsg);
         info[1] = Nan::Null();
     } else {
         info[0] = Nan::Null();
@@ -361,6 +369,7 @@ void HDFileSystem::UV_FileXAttrs(uv_work_t* req) {
     data->xattrs = hdfsListXAttrs(data->fileSystem->fs, data->path, &data->attrCount);
     if (!data->xattrs) {
         data->error = errno;
+        data->errMsg = hdfsGetLastError();
     }
 }
 
@@ -374,7 +383,7 @@ void HDFileSystem::UV_AfterFileXAttrs(uv_work_t* req, int status) {
 
 
     if (data->error) {
-        info[0] = Nan::ErrnoException(data->error);
+        info[0] = Nan::ErrnoException(data->error, NULL, data->errMsg);
         info[1] = Nan::Null();
     } else {
         info[0] = Nan::Null();
