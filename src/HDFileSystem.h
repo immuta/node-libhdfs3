@@ -69,12 +69,15 @@ struct list_work_data {
     char*           targetDir;
     int             entryCount;
     int             error;
+    const char*     errMsg;
 };
 
 struct connect_work_data {
     Nan::Callback*  cb;
     HDFileSystem*   fileSystem;
     hdfsBuilder*    bld;
+    int             error;
+    const char*     errMsg;
 };
 
 struct disconnect_work_data {
@@ -88,6 +91,7 @@ struct fileInfo_work_data {
     char*           path;
     hdfsFileInfo*   info;
     int             error;
+    const char*     errMsg;
 };
 
 struct fileXAttrs_work_data {
@@ -97,6 +101,7 @@ struct fileXAttrs_work_data {
     hdfsXAttr*      xattrs;
     int             attrCount;
     int             error;
+    const char*     errMsg;
 };
 
 #endif
