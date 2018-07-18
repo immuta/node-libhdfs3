@@ -72,8 +72,13 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
     DEBUG("HDFileSystem::UV_Connect");
 
     connect_work_data* data = (connect_work_data *)(req->data);
-
+DEBUG("HDFileSystem::UV_Connect2");
+try {
     data->fileSystem->fs = hdfsBuilderConnect(data->bld);
+} catch (...) {
+    DEBUG("HDFileSystem::UV_Connect-stuff went down");
+}
+    DEBUG("HDFileSystem::UV_Connect3");
     if (!data->fileSystem->fs) {
         data->error = errno;
         data->errMsg = hdfsGetLastError();
