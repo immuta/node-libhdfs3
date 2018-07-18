@@ -14,6 +14,8 @@
 */
 #include <errno.h>
 #include <hdfs/Exception.h>
+#include <exception>
+#include <stdexcept>
 
 #include "addon.h"
 
