@@ -160,7 +160,7 @@ hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
                 char* errorMessage = NULL;
                 try {
                     builderInt = hdfsBuilderConfSetStr(bld, NewCString(propKey), NewCString(Nan::Get(additionalConfig, propKey).ToLocalChecked()));
-                } catch (const std::exception &e) {
+                } catch (const std::exception& e) {
                     errorMessage = e.what();
                 }
                 if (builderInt != 0) {
