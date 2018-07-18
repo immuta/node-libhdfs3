@@ -155,7 +155,7 @@ hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
             for (int i = 0; i < propertyCount; i++) {
                 v8::Local<v8::String> propKey = Nan::To<v8::String>(Nan::Get(props, i).ToLocalChecked()).ToLocalChecked();
                 int builderInt = -1;
-                String errorMessage = NULL;
+                char* errorMessage = NULL;
                 try {
                     builderInt = hdfsBuilderConfSetStr(bld, NewCString(propKey), NewCString(Nan::Get(additionalConfig, propKey).ToLocalChecked()));
                 } catch (const std::exception &e) {
