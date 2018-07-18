@@ -163,7 +163,7 @@ hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
                 //} catch (const std::exception& e) {
                 } catch (...) {
                     DEBUG("unknown error");
-                    errorMessage = NewCString("unknown error");
+                    errorMessage = "unknown error";
                     //errorMessage = e.what();
                 }
                 if (builderInt != 0) {
