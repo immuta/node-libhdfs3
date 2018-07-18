@@ -154,10 +154,16 @@ hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
             int propertyCount = props->Length();
             for (int i = 0; i < propertyCount; i++) {
                 v8::Local<v8::String> propKey = Nan::To<v8::String>(Nan::Get(props, i).ToLocalChecked()).ToLocalChecked();
-                if (hdfsBuilderConfSetStr(bld, NewCString(propKey),
-                    NewCString(Nan::Get(additionalConfig, propKey).ToLocalChecked())) != 0) {
+                int builderInt = -1;
+                String errorMessage = null;
+                try {
+                    builderInt = hdfsBuilderConfSetStr(bld, NewCString(propKey), NewCString(Nan::Get(additionalConfig, propKey).ToLocalChecked()));
+                } catch (const std::exception &e) {
+                    errorMessage = e.what();
+                }
+                if (builderInt != 0) {
                     hdfsFreeBuilder(bld);
-                    Nan::ThrowTypeError("Error setting HDFS config property.");
+                    Nan::ThrowTypeError((errorMessage != null) ? errorMessage : "Error setting HDFS config property.");
                     return NULL;
                 }
             }
