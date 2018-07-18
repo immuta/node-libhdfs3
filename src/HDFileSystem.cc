@@ -160,8 +160,11 @@ hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
                 char* errorMessage = NULL;
                 try {
                     builderInt = hdfsBuilderConfSetStr(bld, NewCString(propKey), NewCString(Nan::Get(additionalConfig, propKey).ToLocalChecked()));
-                } catch (const std::exception& e) {
-                    errorMessage = e.what();
+                //} catch (const std::exception& e) {
+                } catch (...) {
+                    DEBUG("unknown error");
+                    errorMessage = NewCString("unknown error");
+                    //errorMessage = e.what();
                 }
                 if (builderInt != 0) {
                     hdfsFreeBuilder(bld);
