@@ -75,11 +75,12 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
         data->fileSystem->fs = hdfsBuilderConnect(data->bld);
     } catch (const Hdfs::HdfsException &e) {
         // Invalid configuration throws a subclass of HdfsException
-        //data->error = 22; // EINVAL
-        //data->errMsg = e.what();
-    } //catch (...) {
-        // Keep any other exceptions from falling through. hdfsGetLastError() below will grab these.
-    //}
+        // We could map each HdfsException type to a specific error code, but what's important
+        // here is for the error message to propogate up. Use a generic IO code since this
+        // is a connection attempt.
+        data->error = 5; // EIO
+        data->errMsg = e.what();
+    }
     if (!data->fileSystem->fs && data->errMsg == NULL) {
         data->error = errno;
         data->errMsg = hdfsGetLastError();

@@ -23,8 +23,8 @@
 
 char* NewCString(v8::Local<v8::Value> val);
 
-//#define DEBUG(msg);
-#define DEBUG(msg) fprintf(stderr, "%s\n", msg);
+#define DEBUG(msg);
+//#define DEBUG(msg) fprintf(stderr, "%s\n", msg);
 
 #define NODE_FS() Nan::ObjectWrap::Unwrap<HDFileSystem>(info.This());
 #define NODE_FILE() Nan::ObjectWrap::Unwrap<HDFile>(info.This());
