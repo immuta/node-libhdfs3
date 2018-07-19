@@ -89,6 +89,7 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
         // Keep any other exceptions from falling through. hdfsGetLastError() below will grab these.
     }
     if (!data->fileSystem->fs && data->errMsg == NULL) {
+        DEBUG("HDFileSystem::UV_Connect-stuff went down2");
         data->error = errno;
         data->errMsg = hdfsGetLastError();
     }
