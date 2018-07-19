@@ -74,7 +74,9 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
     connect_work_data* data = (connect_work_data *)(req->data);
 DEBUG("HDFileSystem::UV_Connect2");
 try {
+    DEBUG("HDFileSystem::UV_Connect3");
     data->fileSystem->fs = hdfsBuilderConnect(data->bld);
+    DEBUG("HDFileSystem::UV_Connect4");
 } catch (...) {
     DEBUG("HDFileSystem::UV_Connect-stuff went down");
 }
