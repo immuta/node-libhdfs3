@@ -82,8 +82,14 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
         DEBUG("HDFileSystem::UV_Connect-stuff went down0");
         //data->errMsg = e.what();
         DEBUG("HDFileSystem::UV_Connect-stuff went down1-");
+        DEBUG("errNo:");
+        DEBUG(errno);
+        
         //DEBUG(e.what());
-        Nan::ThrowTypeError(e.what());
+        data->error = errno;
+        data->errMsg = e.what();
+        DEBUG(data->error)
+        DEBUG(data->errMsg)
     
     } catch (...) {
         // Keep any other exceptions from falling through. hdfsGetLastError() below will grab these.
