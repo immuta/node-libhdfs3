@@ -14,8 +14,6 @@
 */
 #include <errno.h>
 #include <hdfs/Exception.h>
-#include <exception>
-#include <stdexcept>
 
 #include "addon.h"
 
@@ -72,35 +70,18 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
     DEBUG("HDFileSystem::UV_Connect");
 
     connect_work_data* data = (connect_work_data *)(req->data);
-    DEBUG("HDFileSystem::UV_Connect2");
-    //char* errorMessage = NULL;
+
     try {
-        DEBUG("HDFileSystem::UV_Connect3");
         data->fileSystem->fs = hdfsBuilderConnect(data->bld);
-        DEBUG("HDFileSystem::UV_Connect4");
     } catch (const Hdfs::HdfsException &e) {
-        DEBUG("HDFileSystem::UV_Connect-stuff went down0");
-        //data->errMsg = e.what();
-        DEBUG("HDFileSystem::UV_Connect-stuff went down1-");
-        DEBUG(e.what());
-        //errno = 22;
-        DEBUG("errNo:");
-        DEBUG(errno);
-        DEBUG("1");
-        //DEBUG(e.what());
-        data->error = 22;
-        DEBUG("2");
+        // Invalid  configuration properties throw some subclass of HdfsException
+        data->error = 22; // EINVAL
         data->errMsg = e.what();
-        DEBUG("3");
-        //DEBUG(data->error)
-        DEBUG(data->errMsg)
-        DEBUG("endexceptionblock");
-    
     } catch (...) {
         // Keep any other exceptions from falling through. hdfsGetLastError() below will grab these.
     }
     if (!data->fileSystem->fs && data->errMsg == NULL) {
-        DEBUG("HDFileSystem::UV_Connect-stuff went down2");
+        DEBUG("HDFileSystem::UV_Connect2");
         data->error = errno;
         data->errMsg = hdfsGetLastError();
     }
@@ -182,19 +163,11 @@ hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
             int propertyCount = props->Length();
             for (int i = 0; i < propertyCount; i++) {
                 v8::Local<v8::String> propKey = Nan::To<v8::String>(Nan::Get(props, i).ToLocalChecked()).ToLocalChecked();
-                int builderInt = -1;
-                char* errorMessage = NULL;
-                try {
-                    builderInt = hdfsBuilderConfSetStr(bld, NewCString(propKey), NewCString(Nan::Get(additionalConfig, propKey).ToLocalChecked()));
-                //} catch (const std::exception& e) {
-                } catch (...) {
-                    DEBUG("unknown error");
-                    errorMessage = "unknown error";
-                    //errorMessage = e.what();
-                }
-                if (builderInt != 0) {
+                if (hdfsBuilderConfSetStr(bld, NewCString(propKey),
+                    NewCString(Nan::Get(additionalConfig, propKey).ToLocalChecked())) != 0) {
                     hdfsFreeBuilder(bld);
-                    Nan::ThrowTypeError((errorMessage != NULL) ? errorMessage : "Error setting HDFS config property.");
+                    Nan::ThrowTypeError("Error setting HDFS config property.");
+
                     return NULL;
                 }
             }
