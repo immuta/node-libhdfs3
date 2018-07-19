@@ -74,14 +74,14 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
     try {
         data->fileSystem->fs = hdfsBuilderConnect(data->bld);
     } catch (const Hdfs::HdfsException &e) {
-        // Invalid  configuration properties throw some subclass of HdfsException
+        // Invalid configuration throws a subclass of HdfsException
         //data->error = 22; // EINVAL
         //data->errMsg = e.what();
+        return Nan::ThrowTypeError(e.what());
     } catch (...) {
         // Keep any other exceptions from falling through. hdfsGetLastError() below will grab these.
     }
     if (!data->fileSystem->fs && data->errMsg == NULL) {
-        DEBUG("HDFileSystem::UV_Connect2");
         data->error = errno;
         data->errMsg = hdfsGetLastError();
     }
@@ -167,7 +167,6 @@ hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
                     NewCString(Nan::Get(additionalConfig, propKey).ToLocalChecked())) != 0) {
                     hdfsFreeBuilder(bld);
                     Nan::ThrowTypeError("Error setting HDFS config property.");
-
                     return NULL;
                 }
             }
