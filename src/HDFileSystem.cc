@@ -92,7 +92,7 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
         DEBUG("2");
         data->errMsg = e.what();
         DEBUG("3");
-        DEBUG(data->error)
+        //DEBUG(data->error)
         DEBUG(data->errMsg)
         DEBUG("endexceptionblock");
     
