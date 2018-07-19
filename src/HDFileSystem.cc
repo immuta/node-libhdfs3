@@ -78,7 +78,7 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
         data->fileSystem->fs = hdfsBuilderConnect(data->bld);
         DEBUG("HDFileSystem::UV_Connect4");
     } catch (const std::exception& e) {
-        char* errorMessage = e.what();
+        const char* errorMessage = e.what();
         DEBUG("HDFileSystem::UV_Connect-stuff went down1");
         DEBUG(errorMessage);
     
