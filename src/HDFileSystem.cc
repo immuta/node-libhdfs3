@@ -80,7 +80,6 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
         DEBUG("HDFileSystem::UV_Connect4");
     } catch (const Hdfs::HdfsException &e) {
         DEBUG("HDFileSystem::UV_Connect-stuff went down0");
-        data->error = errno;
         data->errMsg = e.what();
         DEBUG("HDFileSystem::UV_Connect-stuff went down1");
         DEBUG(e.what());
