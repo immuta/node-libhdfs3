@@ -76,17 +76,15 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
     } catch (const Hdfs::HdfsException &e) {
         //DEBUG("ALSO:");
         //DEBUG(hdfsGetLastError());
-        // Invalid configuration throws a subclass of HdfsException
-        // We could map each HdfsException type to a specific error code, but what's important
-        // here is for the error message to propogate up. Use a generic IO code since this
-        // is a connection attempt.
-        data->error = errno > 0 ? errno : 5; // Set to generic EIO error if errno has not been set
+        // Invalid configuration throws a subclass of HdfsException but does not set an errno.
+        // Here we want to ensure the proper error message propogates up.
+        // Set the error code to a generic EIO error if errno has not been set.
+        data->error = errno > 0 ? errno : 5; 
         data->errMsg = e.what();
-        
     }
     if (!data->fileSystem->fs && data->errMsg == NULL) {
-        data->errMsg = hdfsGetLastError();
         data->error = errno;
+        data->errMsg = hdfsGetLastError();
     }
 }
 
