@@ -83,11 +83,12 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
         //data->errMsg = e.what();
         DEBUG("HDFileSystem::UV_Connect-stuff went down1-");
         DEBUG(e.what());
+        errno = 22;
         DEBUG("errNo:");
         DEBUG(errno);
         
         //DEBUG(e.what());
-        data->error = 22;
+        data->error = errno;
         data->errMsg = e.what();
         DEBUG(data->error)
         DEBUG(data->errMsg)
