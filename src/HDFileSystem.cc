@@ -80,13 +80,13 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
         // We could map each HdfsException type to a specific error code, but what's important
         // here is for the error message to propogate up. Use a generic IO code since this
         // is a connection attempt.
-        data->error = errno;//5; // EIO
+        data->error = errno > 0 ? errno : 5; // Set to generic EIO error if errno has not been set
         data->errMsg = e.what();
         
     }
     if (!data->fileSystem->fs && data->errMsg == NULL) {
-        data->error = errno;
         data->errMsg = hdfsGetLastError();
+        data->error = errno;
     }
 }
 
