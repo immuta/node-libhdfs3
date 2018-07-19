@@ -75,9 +75,8 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
         data->fileSystem->fs = hdfsBuilderConnect(data->bld);
     } catch (const Hdfs::HdfsException &e) {
         // Invalid configuration throws a subclass of HdfsException
-        //data->error = 22; // EINVAL
-        //data->errMsg = e.what();
-        return Nan::ThrowTypeError(e.what());
+        data->error = 22; // EINVAL
+        data->errMsg = e.what();
     } catch (...) {
         // Keep any other exceptions from falling through. hdfsGetLastError() below will grab these.
     }
