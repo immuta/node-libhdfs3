@@ -16,7 +16,7 @@
             'conditions' : [
                 [ 'OS == "linux"', { 'libraries' : [ '-lhdfs3' ], 'cflags' : [ '-g' ] }],
                 [ 'OS == "mac"', {
-                    'libraries' : [ '-L/usr/local/lib', '-lhdfs3' ]
+                    'libraries' : [ '-L/usr/local/lib', '-lhdfs3' ],
                     'xcode_settings': {
                         'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
                     }
