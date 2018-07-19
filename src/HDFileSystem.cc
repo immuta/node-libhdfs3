@@ -75,7 +75,7 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
         data->fileSystem->fs = hdfsBuilderConnect(data->bld);
     } catch (const Hdfs::HdfsException &e) {
         DEBUG("ALSO:");
-        DEBUG(errno);
+        DEBUG(std::to_string(errno));
         DEBUG(hdfsGetLastError());
         // Invalid configuration throws a subclass of HdfsException
         // We could map each HdfsException type to a specific error code, but what's important
