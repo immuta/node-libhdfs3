@@ -88,7 +88,7 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
         DEBUG(errno);
         
         //DEBUG(e.what());
-        data->error = errno;
+        //data->error = errno;
         data->errMsg = e.what();
         DEBUG(data->error)
         DEBUG(data->errMsg)
