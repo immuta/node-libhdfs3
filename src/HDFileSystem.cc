@@ -73,23 +73,24 @@ void HDFileSystem::UV_Connect(uv_work_t* req) {
 
     connect_work_data* data = (connect_work_data *)(req->data);
     DEBUG("HDFileSystem::UV_Connect2");
-    char* errorMessage = NULL;
+    //char* errorMessage = NULL;
     try {
         DEBUG("HDFileSystem::UV_Connect3");
         data->fileSystem->fs = hdfsBuilderConnect(data->bld);
         DEBUG("HDFileSystem::UV_Connect4");
     } catch (const Hdfs::HdfsException &e) {
         DEBUG("HDFileSystem::UV_Connect-stuff went down0");
-        errorMessage = NewCString(e.what());
+        data->error = errno;
+        data->errMsg = e.what();
         DEBUG("HDFileSystem::UV_Connect-stuff went down1");
-        DEBUG(errorMessage);
+        DEBUG(e.what());
     
     } catch (...) {
         // Keep any other exceptions from falling through. hdfsGetLastError() below will grab these.
     }
-    if (!data->fileSystem->fs) {
+    if (!data->fileSystem->fs && data->errMsg == NULL) {
         data->error = errno;
-        data->errMsg = errorMessage != NULL ? errorMessage : hdfsGetLastError();
+        data->errMsg = hdfsGetLastError();
     }
 }
 
