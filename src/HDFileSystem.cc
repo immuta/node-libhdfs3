@@ -222,7 +222,11 @@ void HDFileSystem::UV_List(uv_work_t* req) {
     DEBUG("HDFileSystem::UV_List");
 
     list_work_data* data = (list_work_data *)(req->data);
+    try {
     data->contents = hdfsListDirectory(data->fileSystem->fs, data->targetDir, &data->entryCount);
+    } catch (...) {
+
+    }
     if (!data->contents) {
         data->error = errno;
         data->errMsg = hdfsGetLastError();
@@ -302,7 +306,11 @@ void HDFileSystem::UV_FileInfo(uv_work_t* req) {
     DEBUG("HDFileSystem::UV_FileInfo");
 
     fileInfo_work_data* data = (fileInfo_work_data *)(req->data);
+    try {
     data->info = hdfsGetPathInfo(data->fileSystem->fs, data->path);
+    } catch (...) {
+
+    }
     if (!data->info) {
         data->error = errno;
         data->errMsg = hdfsGetLastError();
@@ -376,7 +384,11 @@ void HDFileSystem::UV_FileXAttrs(uv_work_t* req) {
     DEBUG("HDFileSystem::UV_FileXAttrs");
 
     fileXAttrs_work_data* data = (fileXAttrs_work_data *)(req->data);
+    try {
     data->xattrs = hdfsListXAttrs(data->fileSystem->fs, data->path, &data->attrCount);
+    } catch (...) {
+        
+    }
     if (!data->xattrs) {
         data->error = errno;
         data->errMsg = hdfsGetLastError();
