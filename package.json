@@ -1,7 +1,7 @@
 {
   "name": "libhdfs3",
   "description": "libhdfs3 bindings for node",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "lib/hdfs.js",
   "homepage": "http://github.com/immuta/node-libhdfs3/",
   "repository": {
