@@ -1,20 +1,17 @@
-node-libhdfs3
----------
+# node-libhdfs3
 
 An asynchronous interface for node.js to HDFS via the libhdfs3 library.
 
-requirements
-------------
+## Requirements
 
 * Immuta version of [libhdfs3](https://github.com/immuta/incubator-hawq) installed
 
-install
--------
+## Install
 
 In order for node-libhdfs3 to build the libhdfs3 library must be installed. The
 easiest way to do that is:
 
-### git
+### Install LibHDSF3 Depenencies
 
 ```bash
 git clone git@github.com:immuta/incubator-hawq.git
@@ -22,24 +19,39 @@ cd incubator-hawq/depends/libhdfs3/osx/
 ./install_homebrew_pkg.sh
 ```
 
-After insuring that all requirements are installed you can install node-libhdfs3 via
-one of the two following options:
+After insuring that all requirements are installed you can install node-libhdfs3
+via one of the two following options:
 
-### git
+### Git
 
 ```bash
 git clone git://github.com/immuta/node-libhdfs3.git
 cd node-libhdfs3
 npm install
 ```
-### npm
+
+### NPM
 
 ```bash
 npm install immuta/node-libhdfs3
 ```
 
-quick example
--------------
+### Static/Dynamic linking
+
+In order to build the bindings as a statically linked library use
+`LIBHDFS3_GYP_ARGS`:
+
+```bash
+LIBHDFS3_GYP_ARGS="--library=static_library" npm install immuta/node-libhdfs3
+```
+
+Conversely for dynamically linked:
+
+```bash
+LIBHDFS3_GYP_ARGS="--library=shared_library" npm install immuta/node-libhdfs3
+```
+
+## Quick Example
 
 ```javascript
 var libhdfs3 = require('./lib/hdfs');
@@ -63,8 +75,7 @@ fs.connect(options, function(err, success) {
 });
 ```
 
-api
----
+## API
 
 ### libhdfs3
 
@@ -81,9 +92,9 @@ var fs = new libhdfs3();
 Open a connection to an HDFS cluster using the supplied connection string.
 
 * **connectionString** - The HDFS connection string for the name node including:
-    - protocol
-    - hostname
-    - port
+  * protocol
+  * hostname
+  * port
 * **callback** - `callback (err, success)`
 
 ```javascript
@@ -98,11 +109,12 @@ fs.connect('hdfs://192.168.99.100:8020', function(err, success) {
     //we now have an open connection to hdfs
 });
 ```
+
 #### .connect(options, callback)
 
-Open a connection to an HDFS cluster using the supplied configuration options. Supported
-options include kerberos authentication, effective user setting (impersonation), and
-any additional HDFS config settings.
+Open a connection to an HDFS cluster using the supplied configuration options.
+Supported options include kerberos authentication, effective user setting
+(impersonation), and any additional HDFS config settings.
 
 * **options** - The configuration options to use when establishing the connection
 * **callback** - `callback (err, success)`
@@ -277,13 +289,12 @@ fs.connect('hdfs://192.168.99.100:8020', function(err, success) {
 });
 ```
 
-TODO
--------
+## TODO
 
-- testing
-- additional error handling
-- testing
-- additional options for read (block size/seek/etc)
-- additional libhdfs API support
-- testing
-- publish to npm
+* testing
+* additional error handling
+* testing
+* additional options for read (block size/seek/etc)
+* additional libhdfs API support
+* testing
+* publish to npm

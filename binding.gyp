@@ -2,6 +2,7 @@
     'targets' : [
         {
             'target_name' : 'hdfs3_bindings',
+            'type': '<(library)',
             'sources' : [
                 'src/addon.cc',
                 'src/HDFileSystem.cc',
