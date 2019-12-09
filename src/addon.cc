@@ -49,8 +49,9 @@ char* NewCString(v8::Local<v8::Value> val) {
     Nan::HandleScope scope;
 
     v8::Local<v8::String> str = Nan::To<v8::String>(val).ToLocalChecked();
-    int len = str->Utf8Length() + 1;
+    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    int len = str->Utf8Length(isolate) + 1;
     char* buffer = new char[len];
-    str->WriteUtf8(buffer, len);
+    str->WriteUtf8(isolate, buffer, len);
     return buffer;
 }
