@@ -104,13 +104,15 @@ void HDFileSystem::UV_AfterConnect(uv_work_t* req, int status) {
 
 hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
     hdfsBuilder* bld = hdfsNewBuilder();
+    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+
     // Connect using the first param as the "connection string"
     if (options->IsString()) {
         char* connectionString = NewCString(options);
         hdfsBuilderSetNameNode(bld, connectionString);
         delete[] connectionString;
     } else if (options->IsObject()) {
-        v8::Local<v8::Object> conf = options->ToObject();
+        v8::Local<v8::Object> conf = options->ToObject(isolate);
         v8::Local<v8::String> nameNodeKey = V8_STRING("nameNode");
         v8::Local<v8::String> portKey = V8_STRING("port");
         v8::Local<v8::String> userNameKey = V8_STRING("userName");
@@ -125,7 +127,7 @@ hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
             delete[] nn;
         }
         if (valueExists(conf, portKey)) {
-            tPort port = Nan::Get(conf, portKey).ToLocalChecked()->Uint32Value();
+            tPort port = Nan::Get(conf, portKey).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).FromJust();
             hdfsBuilderSetNameNodePort(bld, port);
         }
         if (valueExists(conf, userNameKey)) {
@@ -149,7 +151,7 @@ hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
             delete[] ticketPath;
         }
         if (valueExists(conf, extraKey)) {
-            v8::Local<v8::Object> additionalConfig = Nan::Get(conf, extraKey).ToLocalChecked()->ToObject();
+            v8::Local<v8::Object> additionalConfig = Nan::Get(conf, extraKey).ToLocalChecked()->ToObject(isolate);
             v8::Local<v8::Array> props = Nan::GetOwnPropertyNames(additionalConfig).ToLocalChecked();
             int propertyCount = props->Length();
             for (int i = 0; i < propertyCount; i++) {
