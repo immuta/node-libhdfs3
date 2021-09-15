@@ -16,10 +16,7 @@
             ],
             'conditions' : [
                 [ 'OS == "linux"', { 'libraries' : [ '-lhdfs3' ], 'cflags' : [ '-g' ] }],
-                [ 'OS == "mac"', { 'link_settings': {
-                                        'libraries': ['-L/usr/local/lib/']
-                                    },
-                                    'libraries' : [ '-Lhdfs3' ] }
+                [ 'OS == "mac"', { 'libraries' : [ '-lhdfs3' ] }
                 ]
             ]
         }
