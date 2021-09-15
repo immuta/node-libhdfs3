@@ -104,7 +104,7 @@ void HDFileSystem::UV_AfterConnect(uv_work_t* req, int status) {
 
 hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
     hdfsBuilder* bld = hdfsNewBuilder();
-    v8::Isolate* isolate = v8::Isolate::GetCurrent();
+    v8::Local<v8::Context> localContext = Nan::GetCurrentContext();
 
     // Connect using the first param as the "connection string"
     if (options->IsString()) {
@@ -112,7 +112,7 @@ hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
         hdfsBuilderSetNameNode(bld, connectionString);
         delete[] connectionString;
     } else if (options->IsObject()) {
-        v8::Local<v8::Object> conf = options->ToObject(isolate);
+        v8::Local<v8::Object> conf = (options->ToObject(localContext)).FromMaybe(v8::Local<v8::Object>());
         v8::Local<v8::String> nameNodeKey = V8_STRING("nameNode");
         v8::Local<v8::String> portKey = V8_STRING("port");
         v8::Local<v8::String> userNameKey = V8_STRING("userName");
@@ -151,7 +151,7 @@ hdfsBuilder* HDFileSystem::builderFromOptions(v8::Local<v8::Value> options) {
             delete[] ticketPath;
         }
         if (valueExists(conf, extraKey)) {
-            v8::Local<v8::Object> additionalConfig = Nan::Get(conf, extraKey).ToLocalChecked()->ToObject(isolate);
+            v8::Local<v8::Object> additionalConfig = (Nan::Get(conf, extraKey).ToLocalChecked()->ToObject(localContext)).FromMaybe(v8::Local<v8::Object>());
             v8::Local<v8::Array> props = Nan::GetOwnPropertyNames(additionalConfig).ToLocalChecked();
             int propertyCount = props->Length();
             for (int i = 0; i < propertyCount; i++) {
@@ -227,10 +227,11 @@ void HDFileSystem::UV_AfterList(uv_work_t* req, int status) {
 
     list_work_data*         data = (list_work_data *)(req->data);
     v8::Local<v8::Array>    directoryContents = Nan::New<v8::Array>();
+    v8::Local<v8::Context>  localContext = Nan::GetCurrentContext();
 
     if (data->contents) {
         for (int i = 0; i < data->entryCount; i++) {
-            directoryContents->Set(i, createFileInfoObject(data->contents[i]));
+            directoryContents->Set(localContext, i, createFileInfoObject(data->contents[i]));
         }
         hdfsFreeFileInfo(data->contents, data->entryCount);
     }
@@ -382,7 +383,7 @@ void HDFileSystem::UV_AfterFileXAttrs(uv_work_t* req, int status) {
     fileXAttrs_work_data*   data = (fileXAttrs_work_data *)(req->data);
     v8::Local<v8::Object>   xattrs = Nan::New<v8::Object>();
     v8::Local<v8::Value>    info[2];
-
+    v8::Local<v8::Context>  localContext = Nan::GetCurrentContext();
 
     if (data->error) {
         info[0] = Nan::ErrnoException(data->error, NULL, data->errMsg);
@@ -391,7 +392,7 @@ void HDFileSystem::UV_AfterFileXAttrs(uv_work_t* req, int status) {
         info[0] = Nan::Null();
         if (data->attrCount > 0) {
             for (int i = 0; i < data->attrCount; i++) {
-                xattrs->Set(V8_STRING(data->xattrs[i].name), V8_STRING(data->xattrs[i].value));
+                xattrs->Set(localContext, V8_STRING(data->xattrs[i].name), V8_STRING(data->xattrs[i].value));
             }
             info[1] = xattrs;
             hdfsFreeXAttrs(data->xattrs, data->attrCount);
@@ -469,18 +470,20 @@ void HDFileSystem::UV_AfterDisconnect(uv_work_t* req, int status) {
 }
 
 v8::Local<v8::Object> HDFileSystem::createFileInfoObject(hdfsFileInfo info) {
-    v8::Local<v8::Object> fileInfo = Nan::New<v8::Object>();
-    fileInfo->Set(V8_STRING("path"), V8_STRING(info.mName));
-    fileInfo->Set(V8_STRING("size"), Nan::New<v8::Number>(info.mSize));
-    fileInfo->Set(V8_STRING("blockSize"), Nan::New<v8::Number>(info.mBlockSize));
+    v8::Local<v8::Object>   fileInfo = Nan::New<v8::Object>();
+    v8::Local<v8::Context>  localContext = Nan::GetCurrentContext();
+
+    fileInfo->Set(localContext, V8_STRING("path"), V8_STRING(info.mName));
+    fileInfo->Set(localContext, V8_STRING("size"), Nan::New<v8::Number>(info.mSize));
+    fileInfo->Set(localContext, V8_STRING("blockSize"), Nan::New<v8::Number>(info.mBlockSize));
     // Convert timestamps to ms since epoch
-    fileInfo->Set(V8_STRING("lastModified"), Nan::New<v8::Number>(static_cast<long int> (info.mLastMod) * 1000));
-    fileInfo->Set(V8_STRING("lastAccess"), Nan::New<v8::Number>(static_cast<long int> (info.mLastAccess) * 1000));
-    fileInfo->Set(V8_STRING("replication"), Nan::New(info.mReplication));
-    fileInfo->Set(V8_STRING("kind"), V8_STRING(kObjectKindFile == info.mKind ? "FILE" : "DIRECTORY"));
-    fileInfo->Set(V8_STRING("owner"), V8_STRING(info.mOwner));
-    fileInfo->Set(V8_STRING("group"), V8_STRING(info.mGroup));
-    fileInfo->Set(V8_STRING("permissions"), Nan::New(info.mPermissions));
+    fileInfo->Set(localContext, V8_STRING("lastModified"), Nan::New<v8::Number>(static_cast<long int> (info.mLastMod) * 1000));
+    fileInfo->Set(localContext, V8_STRING("lastAccess"), Nan::New<v8::Number>(static_cast<long int> (info.mLastAccess) * 1000));
+    fileInfo->Set(localContext, V8_STRING("replication"), Nan::New(info.mReplication));
+    fileInfo->Set(localContext, V8_STRING("kind"), V8_STRING(kObjectKindFile == info.mKind ? "FILE" : "DIRECTORY"));
+    fileInfo->Set(localContext, V8_STRING("owner"), V8_STRING(info.mOwner));
+    fileInfo->Set(localContext, V8_STRING("group"), V8_STRING(info.mGroup));
+    fileInfo->Set(localContext, V8_STRING("permissions"), Nan::New(info.mPermissions));
     return fileInfo;
 }
 

@@ -116,18 +116,19 @@ void HDFile::UV_AfterRead(uv_work_t* req, int status) {
     v8::Local<v8::Value>    info[2];
     v8::Local<v8::Object>   readInfo = Nan::New<v8::Object>();
     read_work_data*         data = (read_work_data *)(req->data);
+    v8::Local<v8::Context>  localContext = Nan::GetCurrentContext();
 
     if (data->error) {
         info[0] = Nan::ErrnoException(data->error);
         info[1] = Nan::Null();
     } else {
         // Return data which includes bytesRead count, eof, and buffer
-        readInfo->Set(V8_STRING("data"), Nan::NewBuffer(data->buf,
+        readInfo->Set(localContext, V8_STRING("data"), Nan::NewBuffer(data->buf,
                                             data->bytesRead,
                                             buffer_delete_callback,
                                             &data->buf).ToLocalChecked());
-        readInfo->Set(V8_STRING("bytesRead"), Nan::New<v8::Number>(data->bytesRead));
-        readInfo->Set(V8_STRING("eof"), Nan::New(data->bytesRead != FILE_READ_SIZE));
+        readInfo->Set(localContext, V8_STRING("bytesRead"), Nan::New<v8::Number>(data->bytesRead));
+        readInfo->Set(localContext, V8_STRING("eof"), Nan::New(data->bytesRead != FILE_READ_SIZE));
 
         info[0] = Nan::Null();
         info[1] = readInfo;

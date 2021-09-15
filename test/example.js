@@ -16,8 +16,8 @@
 var libhdfs3 = require('../lib/hdfs');
 var fs = new libhdfs3();
 
-var targetDir = '/user/cloudera';    // The target dir should contain files
-var kerbTicketCachePath = undefined;                   // Set this to use kerberos
+var targetDir = '/user/cloudera';       // The target dir should contain files
+var kerbTicketCachePath = undefined;    // Set this to use kerberos
 
 var options = {
     "nameNode": "hdfs://localhost:8020",

@@ -7,7 +7,10 @@
                 'src/HDFileSystem.cc',
                 'src/HDFile.cc'
             ],
-            'cflags' : ['-Wall', '-Wextra', '-Wno-unused-parameter'],
+            'xcode_settings': {
+                'OTHER_CFLAGS': ['-Wno-unused-parameter', '-Wno-unused-result']
+            },
+            'cflags' : ['-Wall', '-Wextra', '-Wno-unused-parameter', '-Wno-unused-result'],
             'include_dirs': [
                 "<!(node -e \"require('nan')\")"
             ],
