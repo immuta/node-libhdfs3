@@ -1,7 +1,7 @@
 {
   "name": "libhdfs3",
   "description": "libhdfs3 bindings for node",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "main": "lib/hdfs.js",
   "homepage": "http://github.com/immuta/node-libhdfs3/",
   "repository": {
@@ -21,7 +21,7 @@
     "lib": "."
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=14.0.0"
   },
   "scripts": {
     "install": "node-gyp rebuild",
@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "bindings": "1.5.0",
-    "nan": "2.14.0"
+    "nan": "2.15.0"
   },
   "gypfile": true
 }
